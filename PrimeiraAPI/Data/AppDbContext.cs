@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PrimeiraAPI.Models;
 
 namespace PrimeiraAPI.Data
 {
@@ -15,6 +16,7 @@ namespace PrimeiraAPI.Data
         public DbSet<Models.AlunoCurso> AlunosCursos { get; set; }
        
         public DbSet<Models.DisciplinaCurso> DisciplinasCursos { get; set; }
+        public DbSet<PrimeiraAPI.Models.Disciplina> Disciplina { get; set; } = default!;
 
     }
 }
