@@ -1,41 +1,58 @@
+using Microsoft.EntityFrameworkCore;
+using PrimeiraAPI.Data;
 using Scalar.AspNetCore;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add serviços basicos para a aplicação, como controllers e OpenAPI.
-
+// Add os serviços básicos para a aplicação, como controladores e OpenAPI
 builder.Services.AddControllers();
 
-//Add OpenAPI para gerar a documentação da API
+// Adiciona peças e API que a API vai usar | OpenAPI (Necessário para gerar a documentação da API)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
-//builder.Build() => é onde a aplicação e construida
+/*  
+ * Add Entity Framework Core e configurar o contexto do banco de dados para usar SQL Server.
+ * A string de conexão é obtida do arquivo appsettings.json.
+ */
+// Entity Framework + LocalDB
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    )
+);
+
+// builder.Build() => É onde a aplicação é construída.
 var app = builder.Build();
 
-// Configure the HTTP/HTTPS request pipeline -> ponto de acesso para conseguir executar um codigo antes de chegar na controller, antes de chegar no endpoint da API
-// permite que funcione somente em ambiente de desenvolvimento,não é para produção
+// Pipeline de processamento de requisições HTTP/HTTPS
 if (app.Environment.IsDevelopment())
 {
-    //endpoint OpenAPI
+    // Endpoint OpenAPI
     app.MapOpenApi();
-    //interface do Scalar para testar API
+
+    // Interface do Scalar para testar a API
     app.MapScalarApiReference(options =>
     {
-        options.Title = "Primeira API - Scalar";
+        options.Title = "Primeira API com Scalar";
         options.Theme = ScalarTheme.Default;
         options.ShowSidebar = true;
     });
-    //Para abrir a interface do scalar automaticamente
+
     // Redireciona a pagina raiz "/" para "/scalar"
     app.MapGet("/", () => Results.Redirect("/scalar"));
+
 }
 
-//Redireciona todas as requisições http para https
+// Redireciona todas as requisições HTTP para HTTPS
 app.UseHttpsRedirection();
-//middleware de autorização (pode/deve ser usado para proteger endpoints especificos
+
+// Middleware de autorização (pode ser configurado  para proteger endpoints específicos)
 app.UseAuthorization();
-//mapeia os controladores para os endpoints da api
+
+// Mapeia os controladores para os endpoints da API
 app.MapControllers();
-//inicia a app e começa a esutar as requisições
+
+// Inicia a aplicação e começa a escutar as requisições
 app.Run();
